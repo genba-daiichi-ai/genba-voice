@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <base target="_top">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GENBA Voice</title>
+  <style>
+    :root{--ink:#102a2b;--sub:#567071;--green:#0b806e;--deep:#075f54;--soft:#e9f7f3;--line:#c9e4dc;--warm:#fff8e7;--blue:#3157d5}
+    *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:linear-gradient(145deg,#dff5ef,#f2f5ff);min-height:100vh;line-height:1.6}
+    .wrap{width:min(760px,100%);margin:auto;padding:24px 14px 48px}.card{background:#fff;border:1px solid rgba(255,255,255,.9);border-radius:28px;box-shadow:0 22px 55px rgba(7,95,84,.14);padding:28px}
+    header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.brand{font-weight:950;font-size:13px;color:var(--green);letter-spacing:.08em}.lang{border:1px solid var(--line);background:#fff;color:var(--deep);border-radius:999px;padding:8px 12px;font-weight:800;cursor:pointer}
+    h1{font-size:clamp(34px,8vw,54px);line-height:1.06;margin:10px 0 12px;letter-spacing:-.035em}.tagline{color:var(--sub);font-size:18px;margin:0 0 24px}.notice{background:var(--soft);border:1px solid var(--line);padding:14px 16px;border-radius:16px;font-size:14px;margin-bottom:22px}
+    label{display:block;font-weight:900;margin:18px 0 7px}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}select,textarea{width:100%;border:2px solid var(--line);border-radius:16px;padding:14px;font:inherit;color:var(--ink);background:#fff;outline:none}textarea{min-height:190px;resize:vertical}select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(11,128,110,.1)}.counter{text-align:right;color:var(--sub);font-size:12px}
+    .action{width:100%;border:0;border-radius:17px;background:linear-gradient(135deg,var(--green),var(--deep));color:#fff;font-size:17px;font-weight:950;padding:16px;margin-top:18px;cursor:pointer;box-shadow:0 12px 24px rgba(11,128,110,.25)}.action:disabled{opacity:.55;cursor:wait}.error{display:none;background:#fff0f0;color:#a51d1d;padding:13px 15px;border-radius:14px;margin-top:15px;font-weight:700}
+    .loading{display:none;text-align:center;padding:35px 0;color:var(--sub)}.spinner{width:42px;height:42px;border:4px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}@keyframes spin{to{transform:rotate(360deg)}}
+    .results{display:none;margin-top:28px}.results h2{font-size:27px;margin:0 0 6px}.result{border:1px solid #e3ece9;border-left:7px solid var(--green);border-radius:16px;padding:16px 17px;margin-top:13px;background:#fcfefd}.result:nth-of-type(3){border-left-color:#e39921;background:var(--warm)}.result:nth-of-type(4){border-left-color:var(--blue)}.result h3{font-size:14px;margin:0 0 6px;color:var(--green);text-transform:uppercase;letter-spacing:.04em}.result p{margin:0;white-space:pre-wrap}.copy{margin-top:10px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;color:var(--deep);font-weight:800;cursor:pointer}.meta{font-size:12px;color:var(--sub);margin-top:16px}.reset{border:0;background:transparent;color:var(--blue);font-weight:800;margin-top:16px;cursor:pointer}
+    footer{text-align:center;color:var(--sub);font-size:12px;margin-top:18px}@media(max-width:600px){.card{padding:22px 17px;border-radius:23px}.row{grid-template-columns:1fr}h1{font-size:42px}}
+  </style>
+</head>
+<body>
+  <main class="wrap"><section class="card">
+    <header><div><div class="brand">現場第一AI｜GENBA DAIICHI AI</div><h1>GENBA Voice</h1></div><button class="lang" id="langBtn" onclick="toggleLanguage();updateDropdownLanguage()">EN</button></header>
+    <p class="tagline" id="tagline">小さな違和感を、改善の最初の一歩へ。</p>
+    <div class="notice" id="notice">会社名、個人名、取引先名、機密情報は入力しないでください。入力内容は保存しません。AIの提案は判断材料のひとつです。</div>
+    <div id="formArea">
+      <div class="row">
+        <div><label id="contextLabel" for="context">どんな場面ですか？</label><select id="context"><option value="">選択してください</option><option>作業・製造</option><option>引き継ぎ・情報共有</option><option>安全・設備</option><option>人間関係・伝え方</option><option>勤務・休憩</option><option>その他</option></select></div>
+        <div><label id="urgencyLabel" for="urgency">今の困り度</label><select id="urgency"><option value="">選択してください</option><option>少し気になる</option><option>困っている</option><option>早めに対応してほしい</option><option>安全上の不安がある</option></select></div>
+      </div>
+      <label id="concernLabel" for="concern">小さな違和感や困りごと</label>
+      <textarea id="concern" maxlength="800" placeholder="例：作業手順が人によって違い、新しく入った人が毎回確認に迷っています。"></textarea>
+      <div class="counter"><span id="count">0</span> / 800</div>
+      <button class="action" id="analyzeBtn" onclick="analyze()">AIと一緒に整理する</button>
+      <div class="error" id="error"></div>
+    </div>
+    <div class="loading" id="loading"><div class="spinner"></div><div id="loadingText">責める相手を探さず、仕組みと小さな一歩を整理しています…</div></div>
+    <section class="results" id="results"><h2 id="resultTitle">整理結果</h2><p id="resultLead" class="tagline">まだ答えではありません。現場で話し始めるための下書きです。</p>
+      <article class="result"><h3 id="summaryHead">起きていること</h3><p id="summary"></p></article>
+      <article class="result"><h3 id="structureHead">仕組みの見立て</h3><p id="structure"></p></article>
+      <article class="result"><h3 id="stepHead">小さく試せる一歩</h3><p id="smallStep"></p></article>
+      <article class="result"><h3 id="messageHead">穏やかに伝える文案</h3><p id="message"></p><button class="copy" id="copyBtn" onclick="copyMessage()">文案をコピー</button></article>
+      <article class="result"><h3 id="cautionHead">確認しておきたいこと</h3><p id="caution"></p></article>
+      <div class="meta" id="meta"></div><button class="reset" id="resetBtn" onclick="resetForm()">別の声を整理する</button>
+    </section>
+  </section><footer>働く人の小さな違和感を、改善のきっかけに。</footer></main>
+  <script>
+    let language='ja';
+    const copy={ja:{tagline:'小さな違和感を、改善の最初の一歩へ。',notice:'会社名、個人名、取引先名、機密情報は入力しないでください。入力内容は保存しません。AIの提案は判断材料のひとつです。',contextLabel:'どんな場面ですか？',urgencyLabel:'今の困り度',concernLabel:'小さな違和感や困りごと',analyzeBtn:'AIと一緒に整理する',loadingText:'責める相手を探さず、仕組みと小さな一歩を整理しています…',resultTitle:'整理結果',resultLead:'まだ答えではありません。現場で話し始めるための下書きです。',summaryHead:'起きていること',structureHead:'仕組みの見立て',stepHead:'小さく試せる一歩',messageHead:'穏やかに伝える文案',copyBtn:'文案をコピー',cautionHead:'確認しておきたいこと',resetBtn:'別の声を整理する',placeholder:'例：作業手順が人によって違い、新しく入った人が毎回確認に迷っています。'},en:{tagline:'Turn small frontline signals into a first step for improvement.',notice:'Do not enter names, company names, client names, or confidential information. Your input is not stored. AI suggestions are a starting point, not a final decision.',contextLabel:'Where is this happening?',urgencyLabel:'How urgent does it feel?',concernLabel:'Small concern or friction',analyzeBtn:'Organize with AI',loadingText:'Looking at the system and a small next step—without blaming people…',resultTitle:'A clearer starting point',resultLead:'This is not the final answer. It is a draft for starting a conversation at work.',summaryHead:'What may be happening',structureHead:'Possible system pattern',stepHead:'A small step to try',messageHead:'A calm message you can use',copyBtn:'Copy message',cautionHead:'What to check',resetBtn:'Organize another concern',placeholder:'Example: Work instructions vary by person, so new team members are unsure whom to follow.'}};
+    const concern=document.getElementById('concern');concern.addEventListener('input',()=>document.getElementById('count').textContent=concern.value.length);
+    function toggleLanguage(){language=language==='ja'?'en':'ja';document.documentElement.lang=language;document.getElementById('langBtn').textContent=language==='ja'?'EN':'日本語';const t=copy[language];Object.keys(t).forEach(k=>{const el=document.getElementById(k);if(el)el.textContent=t[k]});concern.placeholder=t.placeholder}
+    function analyze(){const text=concern.value.trim();hideError();if(text.length<10)return showError(language==='ja'?'10文字以上で、もう少し具体的に入力してください。':'Please enter at least 10 characters.');setBusy(true);google.script.run.withSuccessHandler(showResult).withFailureHandler(()=>{setBusy(false);showError(language==='ja'?'通信に失敗しました。もう一度お試しください。':'The request failed. Please try again.')}).analyzeConcern({language,context:document.getElementById('context').value,urgency:document.getElementById('urgency').value,concern:text})}
+    function showResult(r){setBusy(false);if(!r||!r.success)return showError(r&&r.message?r.message:'Error');const a=r.analysis;['summary','structure','caution'].forEach(k=>document.getElementById(k).textContent=a[k]||'');document.getElementById('smallStep').textContent=a.small_step||'';document.getElementById('message').textContent=a.message||'';document.getElementById('meta').textContent=(r.meta?r.meta.model+' • '+r.meta.version:'');document.getElementById('formArea').style.display='none';document.getElementById('results').style.display='block';window.scrollTo({top:0,behavior:'smooth'})}
+    function setBusy(v){document.getElementById('loading').style.display=v?'block':'none';document.getElementById('analyzeBtn').disabled=v}
+    function showError(m){const e=document.getElementById('error');e.textContent=m;e.style.display='block'}function hideError(){document.getElementById('error').style.display='none'}
+    function resetForm(){document.getElementById('results').style.display='none';document.getElementById('formArea').style.display='block';concern.value='';document.getElementById('count').textContent='0';window.scrollTo({top:0,behavior:'smooth'})}
+    function copyMessage(){navigator.clipboard.writeText(document.getElementById('message').textContent).then(()=>{document.getElementById('copyBtn').textContent=language==='ja'?'コピーしました':'Copied'})}
+    function updateDropdownLanguage(){
+  const contextItems=language==='ja'
+    ?['選択してください','作業・製造','引き継ぎ・情報共有','安全・設備','人間関係・伝え方','勤務・休憩','その他']
+    :['Select one','Work / production','Handoffs / information sharing','Safety / equipment','Communication / relationships','Scheduling / breaks','Other'];
+
+  const urgencyItems=language==='ja'
+    ?['選択してください','少し気になる','困っている','早めに対応してほしい','安全上の不安がある']
+    :['Select one','A small concern','It is causing difficulty','Needs attention soon','There may be a safety risk'];
+
+  document.getElementById('context').innerHTML=contextItems
+    .map((item,i)=>`<option value="${i?item:''}">${item}</option>`).join('');
+
+  document.getElementById('urgency').innerHTML=urgencyItems
+    .map((item,i)=>`<option value="${i?item:''}">${item}</option>`).join('');
+}
+  </script>
+</body>
+</html>

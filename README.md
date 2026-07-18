@@ -4,7 +4,7 @@ GENBA Voice is a bilingual Japanese–English AI assistant that turns small fron
 
 ## Live demo
 
-- [Try GENBA Voice](https://script.google.com/macros/s/AKfycbz7fSkPUYs1qeCBRXLQM5X2pkOllmKIQAPsdDwm_Dp5MzTINjTVzwEDJ3el9COF8sUx/exec)
+- [Try GENBA Voice](https://script.google.com/macros/s/AKfycbyzWac_fdeUBoiO_ugC_2Hr9lkwbuzS8vTMYq0iuGF8lFSAQ0k-VcdCZNx2SbvnNLxj/exec)
 - [Watch the 44-second demo](https://youtu.be/HWja3w6Igzc)
 
 ## What it does
